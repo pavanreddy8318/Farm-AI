@@ -1,0 +1,6 @@
+{
+  "name": "FarmAI",
+  "description": "An intelligent agricultural companion for crop disease diagnosis, interactive expert agronomist chat, and customized farming calendar generation.",
+  "requestFramePermissions": ["camera", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
