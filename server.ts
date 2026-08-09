@@ -299,15 +299,10 @@ function getGeminiClient(): GoogleGenAI {
   if (!aiClient) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not defined. Please configure it in your Settings > Secrets panel.');
+      throw new Error('GEMINI_API_KEY is not defined. Please set it in the .env file.');
     }
     aiClient = new GoogleGenAI({
       apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        },
-      },
     });
   }
   return aiClient;
@@ -399,7 +394,7 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // Enable CORS for cross-origin requests (e.g. AI Studio preview iframe, separate frontend ports)
+  // Enable CORS for cross-origin requests (e.g. preview iframe, separate frontend ports)
   app.use(cors());
   app.options('*', cors());
 
