@@ -1,0 +1,34 @@
+type User @table {
+  email: String!
+  name: String!
+  farmLocation: String
+  preferredCrops: String
+}
+
+type Crop @table {
+  name: String!
+  variety: String!
+  user: User!
+}
+
+type Diagnosis @table {
+  diseaseName: String!
+  confidenceScore: Float!
+  imageUrl: String!
+  timestamp: Timestamp!
+  treatmentRecommendations: String
+  notes: String
+  crop: Crop!
+}
+
+type ChatSession @table {
+  createdAt: Timestamp!
+  user: User!
+}
+
+type ChatMessage @table {
+  senderType: String!
+  content: String!
+  timestamp: Timestamp!
+  chatSession: ChatSession!
+}

@@ -1,0 +1,13 @@
+specVersion: "v1"
+serviceId: "farmai-1d30e-service"
+location: "us-east4"
+schemas:
+  - source: "./schema"
+    datasource:
+      postgresql:
+        database: "farmai-1d30e-database"
+        cloudSql:
+          instanceId: "farmai-1d30e-instance"
+          # schemaValidation: "STRICT"     # STRICT mode makes Postgres schema match Data Connect exactly.
+          # schemaValidation: "COMPATIBLE" # COMPATIBLE mode makes Postgres schema compatible with Data Connect.
+connectorDirs: ["./example"]

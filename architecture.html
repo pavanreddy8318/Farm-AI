@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FarmAI — System Architecture</title>
+<style>
+  :root {
+    --navy: #0f2544;
+    --navy-2: #16375f;
+    --navy-3: #1e4a7a;
+    --green: #16a34a;
+    --green-2: #22c55e;
+    --green-3: #86efac;
+    --ink: #0f2544;
+    --muted: #5b7ba0;
+    --line: #d6e2ee;
+    --paper: #fbfdfe;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(180deg, #eef4f9 0%, var(--paper) 40%);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 60px;
+  }
+  .page-title {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .page-title h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--navy);
+  }
+  .page-title p {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.2px;
+  }
+  .diagram {
+    width: 100%;
+    max-width: 1080px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(15, 37, 68, 0.08);
+    padding: 28px;
+    margin-top: 20px;
+  }
+  svg { width: 100%; height: auto; display: block; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .footnote {
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="page-title">
+    <h1>FarmAI — Precision Agriculture System Architecture</h1>
+    <p>Leaf diagnosis → YOLOv8 inference → Field optimization → AI Calendar → Farm dashboard</p>
+  </div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1020 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+      <title id="title">FarmAI 5-step precision agriculture architecture</title>
+      <desc id="desc">Five-step flow from mobile leaf upload to dashboard heatmap, cost estimate, and action calendar.</desc>
+
+      <defs>
+        <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f8fbfd"/>
+          <stop offset="1" stop-color="#eef5f2"/>
+        </linearGradient>
+        <linearGradient id="navy-card" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#16375f"/>
+          <stop offset="1" stop-color="#0f2544"/>
+        </linearGradient>
+        <linearGradient id="green-card" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#22c55e"/>
+          <stop offset="1" stop-color="#15803d"/>
+        </linearGradient>
+        <marker id="arrow-navy" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L8,4.5 L0,9 Z" fill="#16375f"/>
+        </marker>
+        <marker id="arrow-fade" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L8,4.5 L0,9 Z" fill="#9db8d0"/>
+        </marker>
+      </defs>
+
+      <rect x="2" y="2" width="1016" height="636" rx="14" fill="url(#bg-grad)"/>
+      <rect x="2" y="2" width="1016" height="636" rx="14" fill="none" stroke="#d6e2ee" stroke-width="1.5"/>
+
+      <!-- Header band -->
+      <rect x="24" y="18" width="972" height="46" rx="9" fill="url(#navy-card)"/>
+      <text x="40" y="47" font-size="15" font-weight="700" fill="#ffffff" font-family="Segoe UI, sans-serif">FarmAI</text>
+      <text x="96" y="47" font-size="11.5" fill="#9fc0e0" font-family="Segoe UI, sans-serif">Precision Agriculture Intelligence Pipeline</text>
+      <circle cx="952" cy="41" r="6" fill="#22c55e"/>
+      <text x="966" y="45" font-size="10.5" fill="#9fc0e0" font-family="Segoe UI, sans-serif">LIVE</text>
+
+      <!-- Step 1: Mobile UI -->
+      <g>
+        <rect x="24" y="92" width="176" height="470" rx="10" fill="#ffffff" stroke="#d6e2ee" stroke-width="1.5"/>
+        <rect x="24" y="92" width="176" height="34" rx="10" fill="url(#navy-card)"/>
+        <rect x="24" y="108" width="176" height="18" fill="url(#navy-card)"/>
+        <text x="36" y="114" font-size="11.5" font-weight="700" fill="#ffffff" font-family="Segoe UI, sans-serif">STEP 1 · MOBILE UI</text>
+
+        <!-- Phone frame -->
+        <rect x="50" y="140" width="124" height="252" rx="18" fill="#0f2544" stroke="#16375f"/>
+        <rect x="58" y="148" width="108" height="236" rx="13" fill="#eef5f2"/>
+        <!-- photo placeholder -->
+        <rect x="66" y="158" width="92" height="70" rx="8" fill="#d6e7d8" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <path d="M80 198 l12 -14 10 10 8 -8 18 20 h-34 z" fill="#16a34a"/>
+        <circle cx="100" cy="170" r="5" fill="#15803d"/>
+        <!-- plot picker -->
+        <text x="66" y="244" font-size="9" fill="#0f2544" font-family="Segoe UI, sans-serif" font-weight="600">SELECT FARM PLOT</text>
+        <rect x="66" y="252" width="28" height="16" rx="4" fill="#16375f"/><text x="72" y="264" font-size="8" fill="#fff" font-family="Segoe UI, sans-serif">Zone A</text>
+        <rect x="98" y="252" width="28" height="16" rx="4" fill="#fff" stroke="#16a34a"/><text x="104" y="264" font-size="8" fill="#16a34a" font-family="Segoe UI, sans-serif">Zone B</text>
+        <rect x="130" y="252" width="28" height="16" rx="4" fill="#fff" stroke="#d6e2ee"/><text x="136" y="264" font-size="8" fill="#5b7ba0" font-family="Segoe UI, sans-serif">Zone C</text>
+        <!-- upload button -->
+        <rect x="66" y="278" width="92" height="20" rx="5" fill="#16a34a"/>
+        <text x="112" y="292" font-size="8.5" fill="#fff" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">UPLOAD LEAF PHOTO</text>
+        <rect x="66" y="304" width="92" height="20" rx="5" fill="#16375f"/>
+        <text x="112" y="318" font-size="8.5" fill="#fff" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">RUN DIAGNOSIS</text>
+        <text x="112" y="348" font-size="8" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Fields · Plots · Disease · Dosage</text>
+        <text x="112" y="360" font-size="8" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Health & Cost Controls</text>
+
+        <!-- caption -->
+        <text x="112" y="414" font-size="9.5" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">User Upload</text>
+        <text x="112" y="428" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Leaf photo + plot (A/B/C)</text>
+        <text x="112" y="444" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">+ crop type & location</text>
+      </g>
+
+      <!-- Arrow 1->2 -->
+      <line x1="202" y1="320" x2="252" y2="320" stroke="#16375f" stroke-width="2" marker-end="url(#arrow-navy)"/>
+      <text x="227" y="310" font-size="8.5" fill="#16375f" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">image</text>
+
+      <!-- Step 2: YOLOv8 ML -->
+      <g>
+        <rect x="256" y="92" width="232" height="470" rx="10" fill="#ffffff" stroke="#d6e2ee" stroke-width="1.5"/>
+        <rect x="256" y="92" width="232" height="34" rx="10" fill="url(#green-card)"/>
+        <rect x="256" y="108" width="232" height="18" fill="url(#green-card)"/>
+        <text x="268" y="114" font-size="11.5" font-weight="700" fill="#ffffff" font-family="Segoe UI, sans-serif">STEP 2 · YOLOv8 ML MODEL</text>
+
+        <rect x="278" y="144" width="188" height="96" rx="8" fill="#f2fbf5" stroke="#16a34a" stroke-width="1.5"/>
+        <text x="372" y="170" font-size="10.5" font-weight="700" fill="#15803d" font-family="Segoe UI, sans-serif" text-anchor="middle">custom-trained best.pt</text>
+        <text x="372" y="186" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">trained on crop-disease dataset</text>
+
+        <!-- detected object -->
+        <rect x="288" y="200" width="30" height="26" rx="3" fill="none" stroke="#ef4444" stroke-width="2"/>
+        <text x="289" y="223" font-size="6.5" fill="#ef4444" font-family="Segoe UI, sans-serif">blight 0.94</text>
+        <rect x="322" y="206" width="22" height="18" rx="3" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+        <rect x="348" y="202" width="26" height="24" rx="3" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+
+        <!-- outputs -->
+        <text x="372" y="262" font-size="9.5" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">Model Outputs</text>
+
+        <rect x="278" y="274" width="188" height="30" rx="6" fill="#ffffff" stroke="#d6e2ee"/>
+        <circle cx="294" cy="289" r="4" fill="#22c55e"/>
+        <text x="304" y="293" font-size="9" fill="#0f2544" font-family="Segoe UI, sans-serif">Disease class</text>
+        <text x="450" y="293" font-size="9" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="end">Late Blight</text>
+
+        <rect x="278" y="312" width="188" height="30" rx="6" fill="#ffffff" stroke="#d6e2ee"/>
+        <circle cx="294" cy="327" r="4" fill="#22c55e"/>
+        <text x="304" y="331" font-size="9" fill="#0f2544" font-family="Segoe UI, sans-serif">Confidence</text>
+        <text x="450" y="331" font-size="9" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="end">94%</text>
+
+        <rect x="278" y="350" width="188" height="30" rx="6" fill="#ffffff" stroke="#d6e2ee"/>
+        <circle cx="294" cy="365" r="4" fill="#22c55e"/>
+        <text x="304" y="369" font-size="9" fill="#0f2544" font-family="Segoe UI, sans-serif">Severity %</text>
+        <text x="450" y="369" font-size="9" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="end">25% (bbox area)</text>
+
+        <!-- caption -->
+        <text x="372" y="414" font-size="9.5" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">Leaf Disease Classification</text>
+        <text x="372" y="428" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Bounding-box detection</text>
+        <text x="372" y="444" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Severity from infection area</text>
+      </g>
+
+      <!-- Arrow 2->3 -->
+      <line x1="490" y1="320" x2="540" y2="320" stroke="#16375f" stroke-width="2" marker-end="url(#arrow-navy)"/>
+      <text x="515" y="310" font-size="8.5" fill="#16375f" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">class + severity</text>
+
+      <!-- Step 3: Field Optimization Engine -->
+      <g>
+        <rect x="544" y="92" width="232" height="470" rx="10" fill="#ffffff" stroke="#d6e2ee" stroke-width="1.5"/>
+        <rect x="544" y="92" width="232" height="34" rx="10" fill="url(#navy-card)"/>
+        <rect x="544" y="108" width="232" height="18" fill="url(#navy-card)"/>
+        <text x="556" y="114" font-size="11.5" font-weight="700" fill="#ffffff" font-family="Segoe UI, sans-serif">STEP 3 · FIELD OPTIMIZATION ENGINE</text>
+
+        <!-- inputs -->
+        <rect x="566" y="144" width="188" height="88" rx="8" fill="#f2f6fb" stroke="#16375f" stroke-width="1.5"/>
+        <text x="660" y="166" font-size="10.5" font-weight="700" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle">Decision Inputs</text>
+        <text x="660" y="184" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Plot dimensions (L × W)</text>
+        <text x="660" y="198" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Severity score (%)</text>
+        <text x="660" y="212" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">7-day weather forecast</text>
+
+        <!-- compute -->
+        <rect x="566" y="250" width="188" height="62" rx="8" fill="#0f2544"/>
+        <text x="660" y="276" font-size="9.5" font-weight="700" fill="#86efac" font-family="Segoe UI, sans-serif" text-anchor="middle">Optimization Core</text>
+        <text x="660" y="294" font-size="8" fill="#9fc0e0" font-family="Segoe UI, sans-serif" text-anchor="middle">dosage = f(area, severity, weather)</text>
+
+        <!-- outputs -->
+        <text x="660" y="340" font-size="9.5" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">Engine Outputs</text>
+
+        <rect x="566" y="352" width="188" height="30" rx="6" fill="#ffffff" stroke="#d6e2ee"/>
+        <circle cx="582" cy="367" r="4" fill="#16375f"/>
+        <text x="592" y="371" font-size="9" fill="#0f2544" font-family="Segoe UI, sans-serif">Chemical dosage</text>
+        <text x="740" y="371" font-size="9" fill="#16a34a" font-family="Segoe UI, sans-serif" text-anchor="end" font-weight="600">2.4 L/acre</text>
+
+        <rect x="566" y="390" width="188" height="30" rx="6" fill="#ffffff" stroke="#d6e2ee"/>
+        <circle cx="582" cy="405" r="4" fill="#16375f"/>
+        <text x="592" y="409" font-size="9" fill="#0f2544" font-family="Segoe UI, sans-serif">Spray window</text>
+        <text x="740" y="409" font-size="9" fill="#16a34a" font-family="Segoe UI, sans-serif" text-anchor="end" font-weight="600">Wed 06:00–09:00</text>
+
+        <!-- caption -->
+        <text x="660" y="452" font-size="9.5" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">Precision Dosage Calculation</text>
+        <text x="660" y="466" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Weather-aware spray scheduling</text>
+        <text x="660" y="480" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Liters/acre optimization</text>
+      </g>
+
+      <!-- Arrow 3->4 -->
+      <line x1="778" y1="320" x2="828" y2="320" stroke="#16375f" stroke-width="2" marker-end="url(#arrow-navy)"/>
+      <text x="803" y="310" font-size="8.5" fill="#16375f" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">plan + dosage</text>
+
+      <!-- Step 4: AI Calendar Agent -->
+      <g>
+        <rect x="832" y="92" width="164" height="470" rx="10" fill="#ffffff" stroke="#d6e2ee" stroke-width="1.5"/>
+        <rect x="832" y="92" width="164" height="34" rx="10" fill="url(#navy-card)"/>
+        <rect x="832" y="108" width="164" height="18" fill="url(#navy-card)"/>
+        <text x="844" y="114" font-size="10.5" font-weight="700" fill="#ffffff" font-family="Segoe UI, sans-serif">STEP 4 · AI CALENDAR AGENT</text>
+
+        <rect x="848" y="150" width="132" height="250" rx="8" fill="#f2f6fb" stroke="#16375f" stroke-width="1.5"/>
+        <!-- mini calendar -->
+        <rect x="860" y="166" width="108" height="20" rx="4" fill="#0f2544"/>
+        <text x="914" y="180" font-size="8" fill="#fff" font-family="Segoe UI, sans-serif" text-anchor="middle">7-DAY TREATMENT PLAN</text>
+
+        <rect x="860" y="196" width="108" height="24" rx="4" fill="#fff" stroke="#16a34a"/>
+        <text x="868" y="213" font-size="8" fill="#0f2544" font-family="Segoe UI, sans-serif">Mon · Spray 2.4 L/ac</text>
+        <rect x="860" y="224" width="108" height="24" rx="4" fill="#fff" stroke="#d6e2ee"/>
+        <text x="868" y="241" font-size="8" fill="#5b7ba0" font-family="Segoe UI, sans-serif">Tue · Scout lower canopy</text>
+        <rect x="860" y="252" width="108" height="24" rx="4" fill="#fff" stroke="#d6e2ee"/>
+        <text x="868" y="269" font-size="8" fill="#5b7ba0" font-family="Segoe UI, sans-serif">Wed · Re-spray (wind-safe)</text>
+        <rect x="860" y="280" width="108" height="24" rx="4" fill="#fff" stroke="#d6e2ee"/>
+        <text x="868" y="297" font-size="8" fill="#5b7ba0" font-family="Segoe UI, sans-serif">Thu · Monitor moisture</text>
+        <rect x="860" y="308" width="108" height="24" rx="4" fill="#fff" stroke="#d6e2ee"/>
+        <text x="868" y="325" font-size="8" fill="#5b7ba0" font-family="Segoe UI, sans-serif">Fri · Nutrient check</text>
+        <rect x="860" y="336" width="108" height="24" rx="4" fill="#fff" stroke="#d6e2ee"/>
+        <text x="868" y="353" font-size="8" fill="#5b7ba0" font-family="Segoe UI, sans-serif">Sat · Bio-supplement</text>
+        <rect x="860" y="364" width="108" height="24" rx="4" fill="#fff" stroke="#d6e2ee"/>
+        <text x="868" y="381" font-size="8" fill="#5b7ba0" font-family="Segoe UI, sans-serif">Sun · Re-evaluate</text>
+
+        <text x="914" y="424" font-size="9.5" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle" font-weight="600">Multi-day Calendar</text>
+        <text x="914" y="438" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Precise dosage notes</text>
+        <text x="914" y="452" font-size="8.5" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Auto-updates per zone</text>
+      </g>
+
+      <!-- Arrow 4->5 (down) -->
+      <line x1="914" y1="564" x2="670" y2="614" stroke="#9db8d0" stroke-width="2" marker-end="url(#arrow-fade)"/>
+
+      <!-- Step 5: Dashboard -->
+      <g>
+        <rect x="316" y="590" width="708" height="150" rx="10" fill="#ffffff" stroke="#d6e2ee" stroke-width="1.5"/>
+        <rect x="316" y="590" width="708" height="34" rx="10" fill="url(#green-card)"/>
+        <rect x="316" y="606" width="708" height="18" fill="url(#green-card)"/>
+        <text x="328" y="612" font-size="11.5" font-weight="700" fill="#ffffff" font-family="Segoe UI, sans-serif">STEP 5 · FARM DASHBOARD OUTPUT</text>
+
+        <!-- heatmap -->
+        <rect x="336" y="636" width="180" height="88" rx="6" fill="#f2fbf5" stroke="#d6e2ee"/>
+        <text x="426" y="652" font-size="8" font-weight="600" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle">PLOT HEATMAP</text>
+        <rect x="346" y="660" width="36" height="36" rx="3" fill="#86efac"/>
+        <rect x="386" y="660" width="36" height="36" rx="3" fill="#4ade80"/>
+        <rect x="426" y="660" width="36" height="36" rx="3" fill="#facc15"/>
+        <rect x="466" y="660" width="36" height="36" rx="3" fill="#ef4444"/>
+        <text x="364" y="712" font-size="7" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Zone A</text>
+        <text x="404" y="712" font-size="7" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Zone B</text>
+        <text x="444" y="712" font-size="7" fill="#5b7ba0" font-family="Segoe UI, sans-serif" text-anchor="middle">Zone C</text>
+
+        <!-- cost estimation -->
+        <rect x="528" y="636" width="228" height="88" rx="6" fill="#f2f6fb" stroke="#d6e2ee"/>
+        <text x="642" y="652" font-size="8" font-weight="600" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle">COST ESTIMATION</text>
+        <rect x="540" y="664" width="204" height="18" rx="4" fill="#fff" stroke="#d6e2ee"/>
+        <text x="548" y="677" font-size="8" fill="#0f2544" font-family="Segoe UI, sans-serif">Fungicide (12 L @ ₹1,240/L)</text><text x="736" y="677" font-size="8" fill="#16a34a" font-family="Segoe UI, sans-serif" text-anchor="end" font-weight="600">₹14,880</text>
+        <rect x="540" y="686" width="204" height="18" rx="4" fill="#fff" stroke="#d6e2ee"/>
+        <text x="548" y="699" font-size="8" fill="#0f2544" font-family="Segoe UI, sans-serif">Labor & application</text><text x="736" y="699" font-size="8" fill="#16a34a" font-family="Segoe UI, sans-serif" text-anchor="end" font-weight="600">₹3,200</text>
+        <rect x="540" y="708" width="204" height="14" rx="3" fill="#eaf6ee"/>
+        <text x="548" y="718" font-size="8" fill="#15803d" font-family="Segoe UI, sans-serif" font-weight="600">Estimated total</text><text x="736" y="718" font-size="8" fill="#15803d" font-family="Segoe UI, sans-serif" text-anchor="end" font-weight="600">₹18,080</text>
+
+        <!-- action calendar -->
+        <rect x="768" y="636" width="240" height="88" rx="6" fill="#f2f6fb" stroke="#d6e2ee"/>
+        <text x="888" y="652" font-size="8" font-weight="600" fill="#0f2544" font-family="Segoe UI, sans-serif" text-anchor="middle">ACTION CALENDAR</text>
+        <rect x="780" y="662" width="216" height="18" rx="3" fill="#fff" stroke="#d6e2ee"/>
+        <circle cx="790" cy="671" r="3.5" fill="#16a34a"/><text x="798" y="675" font-size="7.5" fill="#0f2544" font-family="Segoe UI, sans-serif">Mon 06:00 — Spray Zone A, 2.4 L/acre</text>
+        <rect x="780" y="684" width="216" height="18" rx="3" fill="#fff" stroke="#d6e2ee"/>
+        <circle cx="790" cy="693" r="3.5" fill="#16a34a"/><text x="798" y="697" font-size="7.5" fill="#0f2544" font-family="Segoe UI, sans-serif">Wed 07:30 — Re-spray Zone B after rain</text>
+        <rect x="780" y="706" width="216" height="16" rx="3" fill="#eaf6ee"/>
+        <text x="798" y="717" font-size="7.5" fill="#15803d" font-family="Segoe UI, sans-serif" font-weight="600">Sun — Auto re-scan & next-cycle plan</text>
+      </g>
+    </svg>
+
+    <div class="legend">
+      <span><span class="swatch" style="background:#16375f"></span> Backend services</span>
+      <span><span class="swatch" style="background:#16a34a"></span> ML model / ML output</span>
+      <span><span class="swatch" style="background:#f2fbf5"></span> Decision inputs</span>
+      <span><span class="swatch" style="background:#f2f6fb"></span> Compute / data</span>
+      <span><span class="swatch" style="background:#ef4444"></span> Disease detection region</span>
+    </div>
+  </div>
+
+  <p class="footnote">FarmAI v1.3 · 5-step pipeline · Vector style · No IoT hardware dependency</p>
+</body>
+</html>

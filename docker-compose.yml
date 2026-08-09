@@ -1,0 +1,90 @@
+# ---------------------------------------------------------------------------
+# FarmAI — Full-stack Docker Compose
+#
+# Services:
+#   db          PostgreSQL 18 + pgvector (schema auto-applied on first boot)
+#   web         FarmAI Node/Express app (serves React UI + REST API on :3000)
+#   python-api  FastAPI YOLOv8/FGCN engine on :8000 (opt-in profile "ai")
+#
+# Usage:
+#   docker compose up -d db web
+#   docker compose --profile ai up -d            # include the Python ML API
+#   docker compose down                          # stop everything
+#
+# Secrets: copy .env.example -> .env and set GEMINI_API_KEY.
+# ---------------------------------------------------------------------------
+
+name: farmai
+
+services:
+  db:
+    image: pgvector/pgvector:pg18
+    container_name: farmai-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${SQL_USER:-postgres}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD:-01234}
+      POSTGRES_DB: ${SQL_DB_NAME:-farmai}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+      # Auto-create extension + tables/triggers on first initialization.
+      - ./docker/db/01_extensions.sql:/docker-entrypoint-initdb.d/01_extensions.sql:ro
+      - ./docker/db/02_schema.sql:/docker-entrypoint-initdb.d/02_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SQL_USER:-postgres} -d ${SQL_DB_NAME:-farmai}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  web:
+    build: .
+    container_name: farmai-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${SQL_USER:-postgres}:${SQL_PASSWORD:-01234}@db:5432/${SQL_DB_NAME:-farmai}
+      SQL_HOST: db
+      SQL_USER: ${SQL_USER:-postgres}
+      SQL_PASSWORD: ${SQL_PASSWORD:-01234}
+      SQL_DB_NAME: ${SQL_DB_NAME:-farmai}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      APP_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads:/app/public/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  python-api:
+    build: ./backend
+    container_name: farmai-python-api
+    restart: unless-stopped
+    profiles: ["ai"]
+    environment:
+      YOLO_MODEL_PATH: /app/models/best.pt
+    volumes:
+      - ./backend/models:/app/models:ro
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  pgdata:
+  uploads:

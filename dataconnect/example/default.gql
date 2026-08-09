@@ -1,0 +1,25 @@
+mutation CreateUser($email: String!, $name: String!) @auth(level: PUBLIC) {
+  user_insert(data: {email: $email, name: $name})
+}
+
+query GetUserCrops($userId: UUID!) @auth(level: USER) {
+  crops(where: {userId: {eq: $userId}}) {
+    name
+    variety
+  }
+}
+
+mutation AddChatMessage($sessionId: UUID!, $content: String!) @auth(level: USER) {
+  chatMessage_insert(data: {chatSessionId: $sessionId, content: $content, senderType: "user", timestamp_time: {now: true}})
+}
+
+query GetRecentDiagnoses($limit: Int!) @auth(level: USER) {
+  diagnoses(orderBy: [{timestamp: DESC}], limit: $limit) {
+    diseaseName
+    confidenceScore
+    treatmentRecommendations
+    crop {
+      name
+    }
+  }
+}

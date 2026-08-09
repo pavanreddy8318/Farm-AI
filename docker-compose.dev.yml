@@ -1,0 +1,21 @@
+# ---------------------------------------------------------------------------
+# FarmAI — Docker Compose OVERRIDE for local development (hot reload).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Overrides the production `web` service to run `tsx server.ts` with the
+# Vite dev server (HMR) and the source mounted read-write.
+# ---------------------------------------------------------------------------
+
+services:
+  web:
+    build: .
+    environment:
+      NODE_ENV: development
+      DISABLE_HMR: "false"
+    command: ["npx", "tsx", "server.ts"]
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - uploads:/app/public/uploads
