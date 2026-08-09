@@ -1,0 +1,44 @@
+# ---------------------------------------------------------------------------
+# FarmAI — Render Blueprint (Infrastructure as Code)
+#
+# Creates:
+#   - farmai-web   Node/Express web service (React UI + REST API)
+#   - farmai-db    Managed PostgreSQL with pgvector
+#
+# Deploy: connect this GitHub repo to Render and use this render.yaml,
+# or use "Blueprint" -> "New Blueprint Instance" -> select repo.
+#
+# Required manual env var (set after first deploy, then redeploy):
+#   GEMINI_API_KEY   Your Gemini API key (https://aistudio.google.com/apikey)
+# ---------------------------------------------------------------------------
+
+databases:
+  - name: farmai-db
+    plan: free                # Free Postgres expires after 30 days; upgrade to basic ($6/mo) to keep it
+    databaseName: farmai
+    user: farmai
+    region: oregon
+
+services:
+  - type: web
+    name: farmai-web
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    preDeployCommand: node scripts/init-db.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: farmai-db
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false            # Set manually in Render dashboard -> Environment
+      - key: JWT_SECRET
+        generateValue: true    # Auto-generated random secret
+      - key: APP_URL
+        sync: false            # Set to your Render service URL (e.g. https://farmai-web.onrender.com)

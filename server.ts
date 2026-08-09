@@ -392,7 +392,7 @@ async function generateContentWithRetry(
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Enable CORS for cross-origin requests (e.g. preview iframe, separate frontend ports)
   app.use(cors());

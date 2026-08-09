@@ -52,3 +52,30 @@ Useful commands:
 > Note: The Python image installs torch, torch-geometric, and ultralytics, so
 > first build of the `ai` profile is large (several GB). The Node `web` image
 > does not include Python.
+
+## Deploy to Render
+
+**Prerequisites:** a GitHub account and the repo already pushed to GitHub.
+
+1. Push this repository to GitHub (Render deploys straight from the repo).
+2. Go to https://render.com and sign in (GitHub OAuth is supported, no credit
+   card needed on the free tier).
+3. Click **New > Blueprint** and select the `Farm-AI` repository. Render reads
+   [`render.yaml`](render.yaml), which provisions:
+   - `farmai-web` — the Node/Express app (React UI + REST API)
+   - `farmai-db` — managed PostgreSQL with the `pgvector` extension
+4. On the first deploy the schema is applied automatically by
+   `node scripts/init-db.js` (runs as the `preDeployCommand`).
+5. Set the two environment variables in **Dashboard > farmai-web > Environment**:
+   - `GEMINI_API_KEY` — your Gemini API key (https://aistudio.google.com/apikey)
+   - `APP_URL` — your Render URL (e.g. `https://farmai-web.onrender.com`)
+   - `JWT_SECRET` is auto-generated for you.
+6. Redeploy (`Manual Deploy > Deploy latest commit`).
+
+Free-tier notes:
+- The free PostgreSQL instance expires after **30 days** (upgrade to `basic`
+  to keep it).
+- Free web services sleep after ~15 minutes of inactivity; the first request
+  takes 30–60s to wake up.
+
+Health check: `GET /api/health`.
