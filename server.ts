@@ -415,6 +415,15 @@ async function startServer() {
   // Seed vector database on launch
   await seedVectorKnowledgeBase();
 
+  // Verify database connectivity so failures are visible in startup logs.
+  try {
+    const dbCheck = await pool.query('SELECT NOW() AS now');
+    console.log(`[FarmAI] Database connected (server time: ${dbCheck.rows[0].now.toISOString()})`);
+  } catch (dbErr: any) {
+    console.error('[FarmAI] Database connection FAILED:', dbErr.message);
+    console.error('[FarmAI] DATABASE_URL:', DATABASE_URL.replace(/:[^:@/]+@/, ':***@'));
+  }
+
   // ------------------------------------------
   // JWT AUTHENTICATION MIDDLEWARE
   // ------------------------------------------
@@ -438,7 +447,8 @@ async function startServer() {
       req.dbUser = dbUser;
       return next();
     } catch (err: any) {
-      return res.status(500).json({ error: 'Failed to establish a session. Please try again.' });
+      console.error('[Auth] Session establishment failed:', err?.message);
+      return res.status(500).json({ error: `Failed to establish a session: ${err?.message || 'unknown error'}` });
     }
   };
 
