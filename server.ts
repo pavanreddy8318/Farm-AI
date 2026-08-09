@@ -447,8 +447,9 @@ async function startServer() {
       req.dbUser = dbUser;
       return next();
     } catch (err: any) {
-      console.error('[Auth] Session establishment failed:', err?.message);
-      return res.status(500).json({ error: `Failed to establish a session: ${err?.message || 'unknown error'}` });
+      console.error('[Auth] Session establishment failed:', err?.message, err?.code || '');
+      console.error('[Auth] Full error:', err);
+      return res.status(500).json({ error: `Failed to establish a session: ${err?.message || err?.code || 'unknown error'}` });
     }
   };
 
@@ -488,8 +489,16 @@ async function startServer() {
     }
   });
 
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'healthy', timestamp: new Date().toISOString(), mode: 'Direct Access' });
+  app.get('/api/health', async (req, res) => {
+    let db: string | null = null;
+    try {
+      const dbCheck = await pool.query('SELECT NOW() AS now');
+      db = `connected (${dbCheck.rows[0].now.toISOString()})`;
+    } catch (dbErr: any) {
+      db = `error: ${dbErr?.message || dbErr?.code || JSON.stringify(dbErr)}`;
+      console.error('[FarmAI] Health DB check failed:', dbErr);
+    }
+    res.json({ status: 'healthy', timestamp: new Date().toISOString(), database: db });
   });
 
   // ------------------------------------------
