@@ -21,7 +21,14 @@ dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'farmai-local-demo-secret';
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/farmai';
-const pool = new Pool({ connectionString: DATABASE_URL });
+
+// Render's managed Postgres requires SSL; enable it when running there (or when the
+// connection string asks for it) without rejecting the self-signed-ish chain.
+const requiresSsl = !!process.env.RENDER || /sslmode=require/i.test(DATABASE_URL);
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ...(requiresSsl ? { ssl: { rejectUnauthorized: false } } : {}),
+});
 let knowledgeStore: { id: string; topic: string; content: string; embedding: number[] }[] = [];
 
 // Local File/Object store helper
